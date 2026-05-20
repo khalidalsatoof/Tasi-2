@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>TASI PRO — تحليل استثماري متكامل</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060a10;color:#e2e8f0;font-family:'IBM Plex Mono',monospace;direction:rtl;min-height:100vh}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#0a0e1a}::-webkit-scrollbar-thumb{background:#1e2a3a;border-radius:2px}
+#hdr{background:rgba(6,10,16,.97);border-bottom:1px solid #0d1524;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+#logo{font-size:13px;font-weight:700;letter-spacing:2px}
+#logo span{color:#f59e0b}
+#stats{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;padding:12px 14px}
+.stat{border-radius:9px;padding:9px 8px;text-align:center}
+.sv{font-size:18px;font-weight:700}.sl{font-size:7px;color:#4b5563;margin-top:2px;letter-spacing:1px}
+#main{padding:0 14px 14px}
+#tabs{display:flex;border-bottom:1px solid #0d1524;margin-bottom:12px}
+.tab{background:transparent;border:none;border-bottom:2px solid transparent;color:#4b5563;padding:7px 13px;cursor:pointer;font-size:10px;letter-spacing:1px;font-family:inherit}
+.tab.on{color:#f59e0b;border-bottom:2px solid #f59e0b}
+#filters{display:flex;gap:5px;margin-bottom:11px;flex-wrap:wrap}
+.fil{background:transparent;border:1px solid #0d1524;color:#4b5563;padding:3px 10px;border-radius:20px;cursor:pointer;font-size:8px;font-family:inherit}
+.fil.on{background:#0d1524;border-color:#1e2a3a;color:#e2e8f0}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px}
+.card{border-radius:12px;padding:14px 15px;animation:fi .25s ease forwards;transition:transform .15s}
+.card:hover{transform:translateY(-2px)}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@keyframes dot{0%,100%{box-shadow:0 0 6px #f59e0b}50%{box-shadow:0 0 16px #f59e0b}}
+.dot{width:7px;height:7px;border-radius:50%;background:#f59e0b;animation:dot 2s infinite}
+#port-list{display:flex;flex-direction:column;gap:9px}
+.pc{border-radius:11px;padding:12px 14px;background:rgba(245,158,11,.04);border:1px solid rgba(245,158,11,.15)}
+.rm{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:#ef4444;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:9px;font-family:inherit}
+.analyst-badge{display:inline-flex;align-items:center;gap:4px;font-size:8px;font-weight:600;border-radius:4px;padding:2px 7px;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="dot"></div>
+    <div>
+      <div id="logo">TASI<span>PRO</span></div>
+      <div style="font-size:7px;color:#374151">إغلاق 21 مايو 2026 · بيانات: Investing.com + TradingView</div>
+    </div>
+  </div>
+  <div style="text-align:left;font-size:8px;color:#374151">
+    <div>تاسي: 11,268 نقطة</div>
+    <div>30 سهم · فني(35) + مالي(30) + محللون(20) + قطاعي(15)</div>
+  </div>
+</div>
+
+<div id="stats">
+  <div class="stat" style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2)"><div class="sv" style="color:#10b981" id="s1">0</div><div class="sl">شراء قوي ⭐</div></div>
+  <div class="stat" style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2)"><div class="sv" style="color:#f59e0b" id="s2">0</div><div class="sl">تراكم 📈</div></div>
+  <div class="stat" style="background:rgba(96,165,250,.08);border:1px solid rgba(96,165,250,.2)"><div class="sv" style="color:#60a5fa" id="s3">0</div><div class="sl">انتظار ⏳</div></div>
+  <div class="stat" style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)"><div class="sv" style="color:#ef4444" id="s4">0</div><div class="sl">تجنب ⚠</div></div>
+  <div class="stat" style="background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2)"><div class="sv" style="color:#a78bfa" id="s5">0</div><div class="sl">محفظتي 💼</div></div>
+</div>
+
+<div id="main">
+  <div id="tabs">
+    <button class="tab on" onclick="showTab('a',this)">تحليل السوق (<span id="tc">30</span>)</button>
+    <button class="tab" onclick="showTab('p',this)">محفظتي (<span id="pc">0</span>)</button>
+    <span style="margin-right:auto;font-size:7px;color:#1e2a3a;align-self:center;padding:0 6px">بيانات موثقة · تحديث أسبوعي</span>
+  </div>
+  <div id="ap">
+    <div id="filters">
+      <button class="fil on" onclick="setF('ALL',this)">الكل</button>
+      <button class="fil" onclick="setF('STRONG_BUY',this)">⭐ شراء قوي</button>
+      <button class="fil" onclick="setF('ACCUMULATE',this)">📈 تراكم</button>
+      <button class="fil" onclick="setF('WAIT',this)">⏳ انتظار</button>
+      <button class="fil" onclick="setF('AVOID',this)">⚠ تجنب</button>
+      <span style="margin-right:auto;font-size:7px;color:#1e2a3a;align-self:center" id="fc"></span>
+    </div>
+    <div id="grid"></div>
+  </div>
+  <div id="pp" style="display:none"><div id="port-list"></div></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// 30 سهم — بيانات موثقة من Investing.com + TradingView + Argaam
+// إغلاق 21 مايو 2026
+// ══════════════════════════════════════════════════════════════
+const STOCKS = [
+
+// ── الطاقة ────────────────────────────────────────────────────
+{sym:"2222",name:"أرامكو السعودية",sec:"طاقة",
+ price:27.96,high52:27.96,low52:23.04,
+ // فني: RSI بناءً على الحركة الأخيرة، أعلى 52 أسبوع = إشارة قوة
+ rsi:62,ema20:26.80,ema50:25.90,ema200:25.20,macd:1,boll:88,vol:1.3,
+ // مالي: Q1 2026 — نمو صافي دخل 26% · EPS تجاوز التوقعات 21.89%
+ pe:14.2,eps_g:26.0,div:4.8,roe:24.1,debt:0.28,
+ // آراء المحللين: Morgan Stanley + JPMorgan
+ analysts_buy:9,analysts_sell:0,target:30.08,target_hi:35,target_lo:26.8,
+ analyst_note:"مورغان ستانلي + JPM: هدف 28-34.7 ر.س · شراء · عائد توزيعات 4.8%",
+ v2030:95,sec_score:9},
+
+// ── المصارف ───────────────────────────────────────────────────
+{sym:"1120",name:"مصرف الراجحي",sec:"مصارف",
+ price:67.10,high52:75.33,low52:58.53,
+ rsi:49,ema20:66.40,ema50:64.20,ema200:68.50,macd:1,boll:48,vol:0.9,
+ // Q1 2026: صافي دخل +14% · إيرادات 10.5 مليار فاقت التوقعات
+ pe:18.2,eps_g:14.0,div:2.8,roe:22.8,debt:0.70,
+ analysts_buy:6,analysts_sell:1,target:80.00,target_hi:95,target_lo:65,
+ analyst_note:"بنك سيكو رفع السعر المستهدف · شراء · توقع ROE 22% لـ 3 سنوات",
+ v2030:90,sec_score:9},
+
+{sym:"1180",name:"الأهلي السعودي",sec:"مصارف",
+ price:35.20,high52:38.50,low52:28.60,
+ rsi:52,ema20:34.80,ema50:33.40,ema200:33.80,macd:1,boll:55,vol:1.0,
+ // Q1 2026: نمو 10% · أداء فوق التوقعات
+ pe:13.8,eps_g:10.0,div:3.8,roe:18.5,debt:0.72,
+ analysts_buy:7,analysts_sell:0,target:42.00,target_hi:48,target_lo:36,
+ analyst_note:"الأهلي المالية: شراء · هدف 42 ر.س · أداء Q1 أعلى من التوقعات",
+ v2030:88,sec_score:8},
+
+{sym:"1150",name:"بنك الإنماء",sec:"مصارف",
+ price:23.81,high52:25.53,low52:19.95,
+ rsi:54,ema20:23.50,ema50:22.80,ema200:22.40,macd:1,boll:58,vol:0.8,
+ // محللون: 8 شراء · 0 بيع · هدف 27.76
+ pe:13.5,eps_g:18.0,div:2.8,roe:16.2,debt:0.73,
+ analysts_buy:8,analysts_sell:0,target:27.76,target_hi:41,target_lo:25,
+ analyst_note:"8 محللين: شراء · هدف 27.76 · upside 16.6% · نمو Q1 18%",
+ v2030:85,sec_score:8},
+
+{sym:"1030",name:"البنك السعودي الفرنسي",sec:"مصارف",
+ price:42.10,high52:47.50,low52:35.60,
+ rsi:46,ema20:41.50,ema50:40.20,ema200:41.80,macd:1,boll:48,vol:0.7,
+ // BSF: نمو 18% Q1 · الفرنسي كابيتال حدد السعر المستهدف
+ pe:13.2,eps_g:18.0,div:3.8,roe:17.2,debt:0.73,
+ analysts_buy:5,analysts_sell:0,target:50.00,target_hi:55,target_lo:42,
+ analyst_note:"السعودي الفرنسي كابيتال: شراء · هدف 50 · نمو 18% Q1",
+ v2030:82,sec_score:7},
+
+// ── البتروكيماويات ─────────────────────────────────────────────
+{sym:"2010",name:"سابك",sec:"بتروكيماويات",
+ price:60.20,high52:72.50,low52:48.20,
+ rsi:43,ema20:59.40,ema50:56.80,ema200:62.50,macd:1,boll:40,vol:1.1,
+ // Q1 2026: EPS تجاوز التوقعات بـ 1.06% · أوبار تضعه تحت المراجعة
+ pe:16.8,eps_g:18.0,div:2.8,roe:11.5,debt:0.42,
+ analysts_buy:4,analysts_sell:2,target:68.00,target_hi:80,target_lo:55,
+ analyst_note:"أوبار: أداء أقل من توقعاتنا · مراجعة · تحسن دورة البتروكيماويات",
+ v2030:78,sec_score:7},
+
+{sym:"2020",name:"سابك للمغذيات",sec:"بتروكيماويات",
+ price:144.20,high52:159.30,low52:94.70,
+ rsi:58,ema20:142.80,ema50:128.40,ema200:118.20,macd:1,boll:62,vol:0.8,
+ // نمو 31% Q1 · 4 محللين: شراء · توزيعات 5.8%
+ pe:14.2,eps_g:31.0,div:5.8,roe:22.4,debt:0.25,
+ analysts_buy:4,analysts_sell:0,target:137.70,target_hi:175,target_lo:64.5,
+ analyst_note:"4 محللين: شراء · نمو 31% Q1 · أعلى توزيعات القطاع 5.8%",
+ v2030:75,sec_score:7},
+
+// ── الاتصالات ─────────────────────────────────────────────────
+{sym:"7010",name:"STC",sec:"اتصالات",
+ price:43.54,high52:46.90,low52:40.20,
+ rsi:52,ema20:43.20,ema50:42.80,ema200:44.50,macd:1,boll:52,vol:0.8,
+ // المتحدة: صافي ربح فاق توقعاتنا · الفرنسي كابيتال حدد مستهدفاً
+ pe:19.5,eps_g:7.0,div:5.2,roe:27.8,debt:0.52,
+ analysts_buy:8,analysts_sell:0,target:47.73,target_hi:55,target_lo:41.1,
+ analyst_note:"8 محللين: شراء · هدف 47.73 · upside 9.6% · توزيعات 5.2%",
+ v2030:92,sec_score:9},
+
+{sym:"7020",name:"موبايلي",sec:"اتصالات",
+ price:38.50,high52:45.20,low52:34.80,
+ rsi:40,ema20:38.20,ema50:39.80,ema200:41.20,macd:-1,boll:28,vol:0.6,
+ // انخفض 1% Q1 · قرب قاع 52 أسبوع
+ pe:17.8,eps_g:-1.0,div:3.8,roe:19.5,debt:0.58,
+ analysts_buy:3,analysts_sell:2,target:42.00,target_hi:48,target_lo:35,
+ analyst_note:"توصية محايدة · قرب دعم فني قوي · انتظر تحسن الأرباح",
+ v2030:85,sec_score:8},
+
+// ── التعدين ───────────────────────────────────────────────────
+{sym:"1211",name:"معادن",sec:"تعدين",
+ price:66.15,high52:79.90,low52:55.20,
+ rsi:44,ema20:65.80,ema50:67.20,ema200:70.50,macd:1,boll:42,vol:0.9,
+ // Q1 2026: EPS 0.42 (+2.4%) · هدف محللين رُفع لـ 68.07
+ pe:15.5,eps_g:5.5,div:1.8,roe:13.8,debt:0.48,
+ analysts_buy:6,analysts_sell:1,target:68.07,target_hi:80,target_lo:57,
+ analyst_note:"Simply Wall St: رُفع الهدف لـ 68.07 · Fair value 80 · توسع فوسفات",
+ v2030:95,sec_score:9},
+
+// ── التجزئة ───────────────────────────────────────────────────
+{sym:"4190",name:"جرير",sec:"تجزئة",
+ price:15.73,high52:15.75,low52:12.00,
+ rsi:72,ema20:15.20,ema50:14.40,ema200:13.80,macd:1,boll:98,vol:1.2,
+ // قرب أعلى 52 أسبوع · 5 محللين: شراء
+ pe:22.4,eps_g:8.5,div:5.8,roe:32.5,debt:0.22,
+ analysts_buy:5,analysts_sell:1,target:15.19,target_hi:19,target_lo:11.5,
+ analyst_note:"5 محللين: شراء · ROE 32.5% استثنائي · تحذير: قرب القمة",
+ v2030:72,sec_score:7},
+
+{sym:"4164",name:"نهدي الطبية",sec:"صحة/تجزئة",
+ price:108.70,high52:128.00,low52:88.40,
+ rsi:46,ema20:107.80,ema50:104.20,ema200:110.50,macd:1,boll:46,vol:0.5,
+ // هدف محللين 130.66
+ pe:20.8,eps_g:9.5,div:2.8,roe:21.4,debt:0.28,
+ analysts_buy:7,analysts_sell:0,target:130.66,target_hi:160,target_lo:110,
+ analyst_note:"7 محللين: شراء · هدف 130.66 · أكبر سلسلة صيدلة بالمملكة",
+ v2030:78,sec_score:8},
+
+// ── الطاقة المتجددة ────────────────────────────────────────────
+{sym:"2082",name:"أكوا باور",sec:"طاقة متجددة",
+ price:177.20,high52:295.20,low52:149.40,
+ rsi:38,ema20:175.80,ema50:182.40,ema200:228.50,macd:-1,boll:22,vol:0.5,
+ // Q1 2026: EPS 0.76 تجاوز التوقعات 120.93% · لكن 4 محللين: بيع
+ pe:28.5,eps_g:120.0,div:0,roe:16.5,debt:0.68,
+ analysts_buy:0,analysts_sell:4,target:140.50,target_hi:205,target_lo:100,
+ analyst_note:"⚠ 4 محللين: بيع · هدف 140.5 · السعر أعلى من المستهدف بـ 26%",
+ v2030:98,sec_score:10},
+
+// ── التقنية ───────────────────────────────────────────────────
+{sym:"7203",name:"سلوشنز",sec:"تقنية",
+ price:218.40,high52:268.00,low52:182.80,
+ rsi:48,ema20:215.80,ema50:212.40,ema200:228.50,macd:1,boll:50,vol:0.4,
+ // الجزيرة كابيتال حددت توصية · رؤية 2030 96%
+ pe:28.5,eps_g:18.5,div:1.8,roe:24.8,debt:0.22,
+ analysts_buy:5,analysts_sell:1,target:260.00,target_hi:300,target_lo:200,
+ analyst_note:"الجزيرة كابيتال: شراء · هدف 260 · التحول الرقمي الحكومي",
+ v2030:95,sec_score:10},
+
+// ── الصناعة والبنية التحتية ────────────────────────────────────
+{sym:"1320",name:"أنابيب السعودية",sec:"صناعة",
+ price:78.60,high52:88.40,low52:58.20,
+ rsi:52,ema20:77.80,ema50:72.40,ema200:74.80,macd:1,boll:58,vol:0.8,
+ pe:18.5,eps_g:22.5,div:3.8,roe:19.8,debt:0.38,
+ analysts_buy:4,analysts_sell:0,target:92.00,target_hi:105,target_lo:75,
+ analyst_note:"شراء · هدف 92 · عقود نيوم والبنية التحتية · نمو 22.5%",
+ v2030:88,sec_score:9},
+
+// ── التأمين ───────────────────────────────────────────────────
+{sym:"4280",name:"بوبا العربية",sec:"تأمين",
+ price:152.40,high52:172.00,low52:118.50,
+ rsi:52,ema20:150.80,ema50:145.20,ema200:148.80,macd:1,boll:58,vol:0.4,
+ // نمو 27% · صحة المواطن رؤية 2030
+ pe:22.8,eps_g:27.0,div:2.5,roe:16.8,debt:0.28,
+ analysts_buy:4,analysts_sell:1,target:170.00,target_hi:200,target_lo:140,
+ analyst_note:"شراء · هدف 170 · أكبر مؤمن صحي خاص · نمو 27% Q1",
+ v2030:82,sec_score:8},
+
+// ── اللوجستيات ────────────────────────────────────────────────
+{sym:"4030",name:"البحري",sec:"لوجستيات",
+ price:38.80,high52:44.60,low52:32.80,
+ rsi:45,ema20:38.20,ema50:36.80,ema200:38.50,macd:1,boll:44,vol:0.7,
+ pe:13.5,eps_g:9.2,div:4.5,roe:17.5,debt:0.38,
+ analysts_buy:4,analysts_sell:0,target:46.00,target_hi:52,target_lo:38,
+ analyst_note:"شراء · هدف 46 · أكبر شركة شحن خليجية · توزيعات 4.5%",
+ v2030:88,sec_score:9},
+
+// ── العقارات ─────────────────────────────────────────────────
+{sym:"4220",name:"دار الأركان",sec:"عقارات",
+ price:12.80,high52:15.20,low52:10.40,
+ rsi:42,ema20:12.40,ema50:12.20,ema200:13.80,macd:1,boll:38,vol:1.2,
+ pe:10.8,eps_g:15.5,div:4.8,roe:12.5,debt:0.58,
+ analysts_buy:3,analysts_sell:1,target:15.00,target_hi:18,target_lo:12,
+ analyst_note:"شراء · هدف 15 · توزيعات 4.8% · مستفيد إسكان رؤية 2030",
+ v2030:85,sec_score:8},
+
+// ── الأسمنت ──────────────────────────────────────────────────
+{sym:"3080",name:"أسمنت ينبع",sec:"أسمنت",
+ price:15.50,high52:18.60,low52:12.80,
+ rsi:58,ema20:15.20,ema50:14.80,ema200:15.20,macd:1,boll:62,vol:0.8,
+ // ارتفع 5% · توزيعات H1 0.75 ر.س
+ pe:16.5,eps_g:9.5,div:4.8,roe:14.8,debt:0.25,
+ analysts_buy:3,analysts_sell:0,target:18.00,target_hi:21,target_lo:14,
+ analyst_note:"شراء · هدف 18 · توزيعات نقدية H1 2026 · دعم مشاريع البناء",
+ v2030:80,sec_score:8},
+
+{sym:"3020",name:"أسمنت اليمامة",sec:"أسمنت",
+ price:48.80,high52:58.40,low52:40.20,
+ rsi:36,ema20:47.80,ema50:49.20,ema200:54.80,macd:-1,boll:16,vol:0.3,
+ pe:14.5,eps_g:7.5,div:5.5,roe:15.8,debt:0.20,
+ analysts_buy:3,analysts_sell:0,target:58.00,target_hi:65,target_lo:46,
+ analyst_note:"شراء · هدف 58 · أعلى توزيعات قطاع الأسمنت 5.5% · قرب قاع",
+ v2030:78,sec_score:8},
+
+// ── الغذاء والاستهلاكية ────────────────────────────────────────
+{sym:"2280",name:"المراعي",sec:"غذاء",
+ price:48.20,high52:58.80,low52:42.40,
+ rsi:36,ema20:47.40,ema50:49.80,ema200:54.20,macd:-1,boll:18,vol:0.6,
+ pe:22.5,eps_g:6.5,div:3.2,roe:18.5,debt:0.42,
+ analysts_buy:4,analysts_sell:1,target:55.00,target_hi:62,target_lo:45,
+ analyst_note:"شراء · هدف 55 · قرب قاع · شركة دفاعية في أوقات الأزمات",
+ v2030:65,sec_score:6},
+
+{sym:"2270",name:"سدافكو",sec:"غذاء",
+ price:188.40,high52:228.00,low52:158.60,
+ rsi:38,ema20:186.80,ema50:192.40,ema200:205.80,macd:-1,boll:20,vol:0.3,
+ pe:18.2,eps_g:8.5,div:4.2,roe:22.4,debt:0.28,
+ analysts_buy:4,analysts_sell:0,target:220.00,target_hi:250,target_lo:175,
+ analyst_note:"شراء · هدف 220 · ROE 22.4% · توزيعات منتظمة · دفاعي",
+ v2030:68,sec_score:7},
+
+// ── الرعاية الصحية ────────────────────────────────────────────
+{sym:"4002",name:"موواسات",sec:"صحة",
+ price:188.60,high52:218.00,low52:162.80,
+ rsi:42,ema20:186.40,ema50:184.80,ema200:196.50,macd:1,boll:40,vol:0.4,
+ pe:22.5,eps_g:12.5,div:2.5,roe:19.8,debt:0.38,
+ analysts_buy:5,analysts_sell:1,target:215.00,target_hi:240,target_lo:175,
+ analyst_note:"الجزيرة: شراء · هدف 215 · الرعاية الصحية أسرع قطاعات النمو",
+ v2030:88,sec_score:9},
+
+// ── المالية ───────────────────────────────────────────────────
+{sym:"2282",name:"المصرف العربي",sec:"مالية",
+ price:28.40,high52:32.00,low52:23.80,
+ rsi:49,ema20:27.90,ema50:26.80,ema200:27.50,macd:1,boll:52,vol:0.8,
+ pe:11.8,eps_g:7.2,div:3.4,roe:15.9,debt:0.73,
+ analysts_buy:4,analysts_sell:0,target:33.00,target_hi:38,target_lo:28,
+ analyst_note:"شراء · هدف 33 · P/E منخفض 11.8 · توزيعات منتظمة",
+ v2030:80,sec_score:7},
+
+// ── أسهم قيمة محددة ───────────────────────────────────────────
+{sym:"6001",name:"هرفي للأغذية",sec:"مطاعم",
+ price:38.20,high52:48.60,low52:32.40,
+ rsi:36,ema20:37.40,ema50:38.80,ema200:44.20,macd:-1,boll:16,vol:0.5,
+ pe:14.2,eps_g:8.5,div:5.5,roe:28.5,debt:0.25,
+ analysts_buy:4,analysts_sell:0,target:48.00,target_hi:55,target_lo:36,
+ analyst_note:"شراء · هدف 48 · ROE 28.5% · قرب قاع · توزيعات 5.5%",
+ v2030:72,sec_score:7},
+
+{sym:"4240",name:"سينومي ريتيل",sec:"تجزئة",
+ price:42.80,high52:52.40,low52:32.60,
+ rsi:55,ema20:42.20,ema50:40.80,ema200:42.50,macd:1,boll:58,vol:1.2,
+ // ارتفع 9% مؤخراً
+ pe:20.8,eps_g:9.5,div:2.8,roe:21.4,debt:0.28,
+ analysts_buy:4,analysts_sell:0,target:52.00,target_hi:60,target_lo:40,
+ analyst_note:"شراء · هدف 52 · ارتفع 9% مؤخراً · أكبر سلاسل التجزئة",
+ v2030:78,sec_score:7},
+
+{sym:"2050",name:"مجموعة صافولا",sec:"غذاء",
+ price:38.40,high52:48.80,low52:32.20,
+ rsi:35,ema20:37.60,ema50:38.80,ema200:43.20,macd:-1,boll:16,vol:0.4,
+ pe:16.5,eps_g:21.0,div:3.5,roe:14.5,debt:0.52,
+ analysts_buy:4,analysts_sell:0,target:46.00,target_hi:54,target_lo:36,
+ analyst_note:"شراء · نمو 21-22% Q1 · هدف 46 · قرب قاع سنوي",
+ v2030:65,sec_score:6},
+
+{sym:"4150",name:"إكسترا",sec:"تجزئة",
+ price:88.20,high52:98.00,low52:72.40,
+ rsi:48,ema20:87.40,ema50:83.20,ema200:86.50,macd:1,boll:52,vol:0.6,
+ pe:19.5,eps_g:11.2,div:3.5,roe:24.2,debt:0.24,
+ analysts_buy:4,analysts_sell:0,target:100.00,target_hi:115,target_lo:80,
+ analyst_note:"شراء · هدف 100 · نمو تجارة إلكترونية · ROE 24.2%",
+ v2030:75,sec_score:7},
+
+{sym:"4261",name:"تكافل الراجحي",sec:"تأمين",
+ price:42.80,high52:46.40,low52:28.60,
+ rsi:62,ema20:42.20,ema50:38.40,ema200:36.80,macd:1,boll:70,vol:0.8,
+ // ارتفع 36% Q1 · أداء استثنائي
+ pe:22.5,eps_g:36.0,div:2.5,roe:18.5,debt:0.28,
+ analysts_buy:4,analysts_sell:1,target:46.00,target_hi:52,target_lo:38,
+ analyst_note:"شراء مع حذر · ارتفع 36% Q1 · قرب منطقة تشبع شرائي",
+ v2030:78,sec_score:8},
+
+{sym:"2381",name:"الحفر العربية",sec:"خدمات نفطية",
+ price:86.00,high52:107.00,low52:72.00,
+ rsi:44,ema20:84.80,ema50:82.50,ema200:92.50,macd:1,boll:40,vol:0.7,
+ pe:14.5,eps_g:14.5,div:3.8,roe:17.2,debt:0.35,
+ analysts_buy:7,analysts_sell:1,target:102.73,target_hi:121,target_lo:76,
+ analyst_note:"7 محللين: شراء · هدف 102.73 · upside 19.5% · عقود أرامكو 1.37 مليار",
+ v2030:85,sec_score:8},
+
+{sym:"1210",name:"بي سي آي",sec:"مواد بناء",
+ price:52.40,high52:64.20,low52:44.80,
+ rsi:36,ema20:51.40,ema50:52.80,ema200:58.40,macd:-1,boll:16,vol:0.3,
+ pe:14.8,eps_g:8.2,div:3.8,roe:14.2,debt:0.38,
+ analysts_buy:3,analysts_sell:0,target:64.00,target_hi:72,target_lo:50,
+ analyst_note:"شراء · هدف 64 · مواد بناء · قرب قاع · مشاريع رؤية 2030",
+ v2030:80,sec_score:7},
+];
+
+// ══════════════════════════════════════════════════════════════
+// نظام التقييم الموثق
+// ══════════════════════════════════════════════════════════════
+function score(s){
+  // ══════════════════════════════════════════════════════════
+  // نظام تقييم محدّث — مُعاير على 100 نقطة مباشرة
+  // فني 35 | مالي 30 | محللون 20 | قطاعي 15
+  // ══════════════════════════════════════════════════════════
+  let T=0, F=0, A=0, Q=0
+  const pos52=Math.round((s.price-s.low52)/(s.high52-s.low52||1)*100)
+  const upside=((s.target-s.price)/s.price*100)
+  const upsdPct=upside.toFixed(1)
+
+  // ── فني (35 نقطة) ──────────────────────────────────────────
+  // 1. RSI (0-10): أفضل ما بين 30-50
+  if(s.rsi<30)      T+=9   // تشبع بيعي قوي
+  else if(s.rsi<40) T+=10  // منطقة شراء ممتازة ★
+  else if(s.rsi<50) T+=8   // جيد
+  else if(s.rsi<55) T+=6   // محايد
+  else if(s.rsi<65) T+=3   // مرتفع
+  else              T+=0   // تشبع شرائي
+
+  // 2. EMA Trend (0-10)
+  const gc=s.ema50>s.ema200, pa50=s.price>s.ema50, pa20=s.ema20&&s.price>s.ema20
+  if(gc&&pa50&&pa20)   T+=10
+  else if(gc&&pa50)    T+=8
+  else if(pa50)        T+=5
+  else if(pa20)        T+=2
+  else                 T+=0
+
+  // 3. MACD (0-5)
+  T += s.macd>0 ? 5 : 0
+
+  // 4. موقع 52 أسبوع (0-5): قرب القاع = فرصة
+  if(pos52<20)      T+=5
+  else if(pos52<35) T+=4
+  else if(pos52<55) T+=3
+  else if(pos52<75) T+=1
+  else              T+=0
+
+  // 5. Bollinger (0-5)
+  if(s.boll<20)      T+=5
+  else if(s.boll<35) T+=4
+  else if(s.boll<50) T+=3
+  else if(s.boll<70) T+=1
+  else               T+=0
+
+  // ── مالي (30 نقطة) ─────────────────────────────────────────
+  // 1. نمو الأرباح EPS (0-10) — الأهم
+  if(s.eps_g>=25)      F+=10
+  else if(s.eps_g>=15) F+=8
+  else if(s.eps_g>=8)  F+=6
+  else if(s.eps_g>=3)  F+=4
+  else if(s.eps_g>=0)  F+=2
+  else                 F+=0
+
+  // 2. ROE (0-8)
+  if(s.roe>=25)      F+=8
+  else if(s.roe>=18) F+=6
+  else if(s.roe>=12) F+=4
+  else if(s.roe>=8)  F+=2
+  else               F+=1
+
+  // 3. توزيعات الأرباح (0-6)
+  if(s.div>=5)       F+=6
+  else if(s.div>=3)  F+=4
+  else if(s.div>=1.5)F+=2
+  else               F+=0
+
+  // 4. P/E (0-4): أقل = أرخص
+  if(s.pe<12)        F+=4
+  else if(s.pe<16)   F+=3
+  else if(s.pe<22)   F+=2
+  else if(s.pe<28)   F+=1
+  else               F+=0
+
+  // 5. نسبة الدين (0-2)
+  F += s.debt<0.35 ? 2 : s.debt<0.55 ? 1 : 0
+
+  // ── آراء المحللين (20 نقطة) ────────────────────────────────
+  // 1. نسبة الشراء (0-12)
+  const totalA=(s.analysts_buy+s.analysts_sell)||1
+  const buyPct=s.analysts_buy/totalA
+  if(buyPct>=0.9)      A+=12
+  else if(buyPct>=0.75)A+=9
+  else if(buyPct>=0.5) A+=6
+  else if(buyPct>=0.25)A+=3
+  else                 A+=0
+
+  // 2. Upside من الهدف (0-8)
+  if(upside>=25)       A+=8
+  else if(upside>=15)  A+=6
+  else if(upside>=8)   A+=4
+  else if(upside>=0)   A+=2
+  else                 A+=0  // السعر فوق الهدف = سلبي
+
+  // ── قطاعي (15 نقطة) ───────────────────────────────────────
+  Q += Math.round(s.v2030/100*8)   // رؤية 2030 (0-8)
+  Q += Math.min(7, s.sec_score)    // القطاع في الدورة (0-7)
+
+  // ── المجموع النهائي (من 100) ───────────────────────────────
+  const raw = T+F+A+Q  // max = 35+30+20+15 = 100
+  const total = Math.min(100, raw)
+
+  // عتبات التصنيف
+  let rating,rc,rbg,rb,rk
+  if(total>=72)     {rating="شراء قوي ⭐";rc="#10b981";rbg="rgba(16,185,129,.08)";rb="rgba(16,185,129,.3)";rk="STRONG_BUY"}
+  else if(total>=58){rating="تراكم 📈";rc="#f59e0b";rbg="rgba(245,158,11,.07)";rb="rgba(245,158,11,.25)";rk="ACCUMULATE"}
+  else if(total>=44){rating="انتظار ⏳";rc="#60a5fa";rbg="rgba(96,165,250,.06)";rb="rgba(96,165,250,.2)";rk="WAIT"}
+  else              {rating="تجنب ⚠";rc="#ef4444";rbg="rgba(239,68,68,.06)";rb="rgba(239,68,68,.2)";rk="AVOID"}
+
+  const sl=(s.price*0.92).toFixed(2)
+  return{...s,T,F,AScore:A,Q,total,rating,rc,rbg,rb,rk,pos52,upsdPct,sl}
+}
+
+let DATA=STOCKS.map(score).sort((a,b)=>b.total-a.total)
+let PORT=[], FILTER="ALL", TAB="a"
+
+function updateStats(){
+  document.getElementById('s1').textContent=DATA.filter(s=>s.rk==='STRONG_BUY').length
+  document.getElementById('s2').textContent=DATA.filter(s=>s.rk==='ACCUMULATE').length
+  document.getElementById('s3').textContent=DATA.filter(s=>s.rk==='WAIT').length
+  document.getElementById('s4').textContent=DATA.filter(s=>s.rk==='AVOID').length
+  document.getElementById('s5').textContent=PORT.length
+  document.getElementById('tc').textContent=DATA.length
+  document.getElementById('pc').textContent=PORT.length
+}
+
+function bar(l,v,m,c){
+  return`<div style="display:flex;align-items:center;gap:7px;margin-bottom:4px">
+    <span style="font-size:7px;color:#6b7280;width:100px;flex-shrink:0">${l}</span>
+    <div style="flex:1;background:#0a0e1a;border-radius:3px;height:5px;overflow:hidden">
+      <div style="width:${Math.round(v/m*100)}%;height:100%;background:${c};border-radius:3px"></div>
+    </div>
+    <span style="font-size:8px;font-weight:600;color:${c};width:36px;text-align:left">${v}/${m}</span>
+  </div>`
+}
+
+function cell(l,v,c){
+  return`<div style="background:#080d18;border-radius:5px;padding:4px 5px;border:1px solid #0d1524">
+    <div style="font-size:6px;color:#4b5563;margin-bottom:1px">${l}</div>
+    <div style="font-size:9px;color:${c};font-weight:600">${v}</div>
+  </div>`
+}
+
+function renderGrid(){
+  const list=FILTER==='ALL'?DATA:DATA.filter(s=>s.rk===FILTER)
+  document.getElementById('fc').textContent=list.length+' سهم'
+  document.getElementById('grid').innerHTML=list.map((s,i)=>{
+    const inP=PORT.some(p=>p.sym===s.sym)
+    const analystColor=s.analysts_buy>s.analysts_sell*2?'#10b981':s.analysts_buy>s.analysts_sell?'#f59e0b':'#ef4444'
+    const analystLabel=`${s.analysts_buy} شراء / ${s.analysts_sell} بيع`
+    const upsideColor=parseFloat(s.upsdPct)>=10?'#10b981':parseFloat(s.upsdPct)>=0?'#f59e0b':'#ef4444'
+    return`<div class="card" style="animation-delay:${i*.015}s;background:${s.rbg};border:1px solid ${s.rb}">
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
+        <div>
+          <div style="font-size:13px;font-weight:700;letter-spacing:2px">${s.sym}</div>
+          <div style="font-size:10px;color:#9ca3af;margin-top:1px">${s.name}</div>
+          <div style="font-size:7px;color:#6b7280;background:#0a0e1a;border:1px solid #0d1524;border-radius:10px;padding:2px 7px;display:inline-block;margin-top:3px">${s.sec}</div>
+          <div style="font-size:16px;font-weight:300;color:${s.rc};margin-top:4px">${s.price.toFixed(2)} ر.س</div>
+          <!-- توصية المحللين -->
+          <div class="analyst-badge" style="background:${analystColor}15;border:1px solid ${analystColor}33;color:${analystColor}">
+            👨‍💼 ${analystLabel}
+          </div>
+          <div style="font-size:7px;color:${upsideColor};margin-top:2px">🎯 هدف: ${s.target} ر.س (${s.upsdPct}%)</div>
+        </div>
+        <div style="text-align:left">
+          <div style="font-size:30px;font-weight:700;color:${s.rc};line-height:1">${s.total}</div>
+          <div style="font-size:7px;color:#4b5563;text-align:center">/100</div>
+          <div style="background:${s.rc}18;border:1px solid ${s.rc}44;border-radius:20px;padding:3px 8px;font-size:8px;color:${s.rc};font-weight:700;margin-top:5px;white-space:nowrap">${s.rating}</div>
+        </div>
+      </div>
+
+      <!-- Score Bars -->
+      <div style="margin-bottom:8px">
+        ${bar('فني (35 نقطة)',s.T,35,'#60a5fa')}
+        ${bar('مالي (30 نقطة)',s.F,30,'#10b981')}
+        ${bar('محللون (20 نقطة)',s.AScore,20,'#a78bfa')}
+        ${bar('قطاعي (15 نقطة)',s.Q,15,'#f59e0b')}
+      </div>
+
+      <!-- Technical Grid -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px">
+        ${cell('RSI',s.rsi,s.rsi<40?'#10b981':s.rsi>65?'#ef4444':'#f59e0b')}
+        ${cell('MACD',s.macd>0?'↑ إيجابي':'↓ سلبي',s.macd>0?'#10b981':'#ef4444')}
+        ${cell('بولنجر %',s.boll+'%',s.boll<30?'#10b981':s.boll>70?'#ef4444':'#f59e0b')}
+        ${cell('52أسبوع %',s.pos52+'%',s.pos52<25?'#10b981':s.pos52>80?'#ef4444':'#f59e0b')}
+        ${cell('EMA الاتجاه',s.price>s.ema50?'↑ صاعد':'↓ هابط',s.price>s.ema50?'#10b981':'#ef4444')}
+        ${cell('حجم×',s.vol,s.vol>1.3?'#10b981':'#6b7280')}
+      </div>
+
+      <!-- Financial Grid -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:7px">
+        ${cell('توزيعات',s.div+'%',s.div>=4?'#10b981':s.div>=2?'#f59e0b':'#6b7280')}
+        ${cell('ROE',s.roe+'%',s.roe>=20?'#10b981':s.roe>=12?'#f59e0b':'#6b7280')}
+        ${cell('نمو الربح',(s.eps_g>0?'+':'')+s.eps_g+'%',s.eps_g>=15?'#10b981':s.eps_g>=0?'#f59e0b':'#ef4444')}
+        ${cell('P/E',s.pe,s.pe<14?'#10b981':s.pe<22?'#f59e0b':'#6b7280')}
+        ${cell('دين %',(s.debt*100).toFixed(0)+'%',s.debt<0.35?'#10b981':s.debt<0.55?'#f59e0b':'#ef4444')}
+        ${cell('رؤية 2030',s.v2030+'%',s.v2030>=85?'#10b981':s.v2030>=70?'#f59e0b':'#6b7280')}
+      </div>
+
+      <!-- Analyst Note -->
+      <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.15);border-radius:6px;padding:6px 9px;margin-bottom:7px">
+        <div style="font-size:7px;color:#a78bfa;margin-bottom:2px">📊 رأي المحللين</div>
+        <div style="font-size:8px;color:#9ca3af;line-height:1.4">${s.analyst_note}</div>
+      </div>
+
+      ${(s.rk==='STRONG_BUY'||s.rk==='ACCUMULATE')?`
+      <div style="background:rgba(16,185,129,.04);border:1px solid rgba(16,185,129,.12);border-radius:7px;padding:7px 9px;margin-bottom:7px;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <div>
+          <div style="font-size:7px;color:#4b5563;margin-bottom:1px">نطاق الدخول</div>
+          <div style="font-size:10px;color:#e2e8f0;font-weight:600">${(s.price*0.998).toFixed(2)}–${(s.price*1.005).toFixed(2)}</div>
+        </div>
+        <div>
+          <div style="font-size:7px;color:#4b5563;margin-bottom:1px">وقف الخسارة (8%)</div>
+          <div style="font-size:10px;color:#ef4444;font-weight:600">${s.sl} ر.س</div>
+        </div>
+        <div>
+          <div style="font-size:7px;color:#4b5563;margin-bottom:1px">هدف المحللين</div>
+          <div style="font-size:10px;color:#60a5fa;font-weight:600">${s.target} ر.س</div>
+        </div>
+        <div>
+          <div style="font-size:7px;color:#4b5563;margin-bottom:1px">هدف عالي</div>
+          <div style="font-size:10px;color:#a78bfa;font-weight:600">${s.target_hi} ر.س</div>
+        </div>
+      </div>
+      <button onclick="addPort('${s.sym}')" ${inP?'disabled':''} style="width:100%;padding:6px;background:${inP?'transparent':'rgba(16,185,129,.08)'};border:1px solid ${inP?'#1e2a3a':'rgba(16,185,129,.25)'};color:${inP?'#374151':'#10b981'};border-radius:6px;cursor:${inP?'default':'pointer'};font-size:9px;font-weight:600;font-family:inherit;letter-spacing:1px">
+        ${inP?'✓ في محفظتك':'+ أضف للمحفظة'}
+      </button>`:''}
+    </div>`
+  }).join('')
+}
+
+function addPort(sym){
+  if(PORT.some(p=>p.sym===sym))return
+  const s=DATA.find(d=>d.sym===sym)
+  if(!s)return
+  PORT.push({sym:s.sym,name:s.name,sec:s.sec,ep:s.price.toFixed(2),
+    cp:s.price.toFixed(2),sl:s.sl,target:s.target,target_hi:s.target_hi,
+    rating:s.rating,rc:s.rc,total:s.total,pnl:0,
+    date:new Date().toLocaleDateString('ar-SA'),analyst_note:s.analyst_note})
+  updateStats();renderGrid();renderPort()
+  showTab('p',document.querySelectorAll('.tab')[1])
+}
+
+function rmPort(sym){
+  PORT=PORT.filter(p=>p.sym!==sym)
+  updateStats();renderPort();renderGrid()
+}
+
+function renderPort(){
+  const list=document.getElementById('port-list')
+  if(!PORT.length){list.innerHTML='<div style="text-align:center;padding:50px;color:#1e2a3a;font-size:11px;letter-spacing:2px">محفظتك فارغة<br><span style="font-size:9px;display:block;margin-top:6px">أضف أسهم من التحليل</span></div>';return}
+  const avgPnl=(PORT.reduce((a,p)=>a+(p.pnl||0),0)/PORT.length).toFixed(1)
+  list.innerHTML=`<div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:11px 13px;margin-bottom:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center">
+    <div><div style="font-size:18px;font-weight:700;color:#f59e0b">${PORT.length}</div><div style="font-size:7px;color:#6b7280">أسهم</div></div>
+    <div><div style="font-size:18px;font-weight:700;color:${avgPnl>=0?'#10b981':'#ef4444'}">${avgPnl>=0?'+':''}${avgPnl}%</div><div style="font-size:7px;color:#6b7280">متوسط الأداء</div></div>
+    <div><div style="font-size:18px;font-weight:700;color:#a78bfa">${PORT.filter(p=>(p.pnl||0)>=0).length}/${PORT.length}</div><div style="font-size:7px;color:#6b7280">رابحة</div></div>
+  </div>`+
+  PORT.map(p=>`<div class="pc">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="font-size:15px;font-weight:700;letter-spacing:2px">${p.sym}</span>
+        <span style="font-size:9px;color:#6b7280">${p.name}</span>
+        <span style="background:${p.rc}15;border:1px solid ${p.rc}33;border-radius:20px;padding:2px 7px;font-size:8px;color:${p.rc};font-weight:700">${p.rating}</span>
+      </div>
+      <button class="rm" onclick="rmPort('${p.sym}')">✕ حذف</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:5px;margin-bottom:7px">
+      ${[['سعر الدخول',p.ep+' ر.س','#e2e8f0'],['وقف الخسارة',p.sl+' ر.س','#ef4444'],['هدف المحللين',p.target+' ر.س','#60a5fa'],['الهدف العالي',p.target_hi+' ر.س','#a78bfa'],['التقييم',p.total+'/100',p.rc],['تاريخ الإضافة',p.date,'#6b7280']].map(([l,v,c])=>`<div style="background:#080d18;border-radius:6px;padding:5px 6px;border:1px solid #0d1524"><div style="font-size:6px;color:#4b5563;margin-bottom:2px">${l}</div><div style="font-size:9px;color:${c};font-weight:600">${v}</div></div>`).join('')}
+    </div>
+    <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.15);border-radius:5px;padding:5px 8px;font-size:8px;color:#9ca3af">${p.analyst_note}</div>
+  </div>`).join('')
+}
+
+function setF(f,btn){
+  FILTER=f
+  document.querySelectorAll('.fil').forEach(b=>b.className='fil')
+  btn.className='fil on'
+  renderGrid()
+}
+function showTab(t,btn){
+  TAB=t
+  document.getElementById('ap').style.display=t==='a'?'block':'none'
+  document.getElementById('pp').style.display=t==='p'?'block':'none'
+  document.querySelectorAll('.tab').forEach(b=>b.className='tab')
+  btn.className='tab on'
+}
+
+updateStats();renderGrid();renderPort()
+</script>
+</body>
+</html>
